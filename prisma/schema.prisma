@@ -1,0 +1,51 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  passwordHash    String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  resumes         Resume[]
+  jobApplications JobApplication[]
+}
+
+model Resume {
+  id              String           @id @default(uuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  rawText         String           @db.Text
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  jobApplications JobApplication[]
+}
+
+model JobApplication {
+  id                   String   @id @default(uuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId             String?
+  resume               Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  companyName          String
+  jobTitle             String
+  jobDescription       String   @db.Text
+  matchScore           Int
+  resumeAnalysisResult Json?
+  matchAnalysis        Json?
+  interviewPrep        Json?
+  roadmap              Json?
+  completedTasks       Json?
+  simulatorAnswers     Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
