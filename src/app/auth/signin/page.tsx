@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react"; // If using NextAuth Client hooks
+import { useState, useEffect, Suspense } from "react";
+import { signIn } from "next-auth/react"; 
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function SignInPage() {
+// 1. Core form logic isolated to allow static extraction by Next.js
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -115,5 +116,18 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 2. Main page wrapper satisfying Next.js build-time requirements
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-sm text-gray-500 animate-pulse">Loading secure connection...</div>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }
